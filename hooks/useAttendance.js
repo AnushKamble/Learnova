@@ -61,6 +61,7 @@ export const useAttendance = ({ role, user }) => {
   const [attendanceRequests, setAttendanceRequests] = useState([]);
   const [hasMoreRequests, setHasMoreRequests] = useState(true);
   const [loadingRequests, setLoadingRequests] = useState(false);
+  const fetchGamificationRef = useRef(null);
 
   // --- student fetchers ---
   const fetchStudentActivity = useCallback(async () => {
@@ -80,7 +81,9 @@ export const useAttendance = ({ role, user }) => {
 
   const fetchGamification = useCallback(async () => {
     if (!user) return;
+    fetchGamificationRef.current?.abort();
     const controller = new AbortController();
+    fetchGamificationRef.current = controller;
     try {
       const token = await user.getIdToken();
       const res = await apiFetch("/api/student/gamification", {
@@ -93,7 +96,6 @@ export const useAttendance = ({ role, user }) => {
         console.error("Failed to load gamification data", err);
       }
     }
-    return () => controller.abort();
   }, [user]);
 
   // --- teacher fetchers ---
@@ -215,6 +217,10 @@ export const useAttendance = ({ role, user }) => {
     fetchStudentActivity();
     fetchGamification();
   }, [role, fetchStudentActivity, fetchGamification]);
+
+  useEffect(() => {
+    return () => fetchGamificationRef.current?.abort();
+  }, []);
 
   useEffect(() => {
     if (role !== "teacher" || !user) return;
