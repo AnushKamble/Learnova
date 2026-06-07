@@ -40,11 +40,15 @@ const syncCustomClaims = async ({ user, role, fullName }) => {
 
     if (response.ok) {
       // Force refresh token so the custom claims are present in the client-side session immediately
-      await user.getIdToken(true).catch(() => {});
+      await user.getIdToken(true).catch((err) => {
+        console.warn("Failed to refresh auth token for custom claims:", err);
+      });
     } else {
       const errorData = await response.json().catch(() => ({}));
       if (errorData?.error?.includes("already registered")) {
-        await user.getIdToken(true).catch(() => {});
+        await user.getIdToken(true).catch((err) => {
+          console.warn("Failed to refresh auth token for custom claims:", err);
+        });
       }
     }
   } catch {
