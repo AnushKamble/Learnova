@@ -47,8 +47,8 @@ const syncCustomClaims = async ({ user, role, fullName }) => {
         await user.getIdToken(true).catch(() => {});
       }
     }
-  } catch {
-    // Keep login non-blocking if claim migration fails.
+  } catch (err) {
+    console.warn("Custom claims sync failed (non-blocking):", err?.message ?? err);
   }
 };
 
