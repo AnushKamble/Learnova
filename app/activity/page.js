@@ -299,6 +299,20 @@ export default function ActivityPage() {
       icon: Target,
       gradient: "from-cyan-500 to-blue-600",
       type: "quiz",
+    },
+    {
+      id: 10,
+      title: "Grammar Galaxy",
+      description: "Improve your grammar skills with interactive exercises and quizzes",
+      category: "language",
+      level: "elementary",
+      duration: "20 min",
+      participants: 3987,
+      difficulty: "Intermediate",
+      rating: 4.6,
+      icon: BookOpen,
+      gradient: "from-rose-500 to-pink-600",
+      type: "quiz",
     }
   ];
 
@@ -355,7 +369,11 @@ export default function ActivityPage() {
     try {
       // 2. Asynchronous Persistence
       const dbId = await logActivity(user.uid, newActivity);
-      await updateUserStat(user.uid, "Courses Enrolled", 1);
+      // Best-effort stats update; do not fail enrollment on stats errors
+      const statResult = await updateUserStat(user.uid, "Courses Enrolled", 1);
+      if (statResult?.success === false) {
+        console.warn("Stats update failed:", statResult.error);
+      }
 
       // 3. Seamless Reconciliation
       setActivities((prev) => [
